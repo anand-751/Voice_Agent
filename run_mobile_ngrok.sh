@@ -14,7 +14,7 @@ cd frontend && npm run build && cd "$DIR"
 
 # 2. Start Uvicorn backend server on port 8000 in background
 echo "🚀 [2/3] Starting backend server on http://0.0.0.0:8000..."
-PYTHONPATH=backend ./.venv/bin/python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 &
+PYTHONPATH=backend ./.venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
 SERVER_PID=$!
 
 cleanup() {
