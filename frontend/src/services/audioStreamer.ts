@@ -115,6 +115,11 @@ export async function startAudioStreaming(
 
 	sourceNode = audioContext.createMediaStreamSource(stream);
 
+	// 85Hz High-Pass Filter: filters out 50Hz/60Hz electrical hum, fan rumble, and low-frequency handling noise
+	const highPassFilter = audioContext.createBiquadFilter();
+	highPassFilter.type = 'highpass';
+	highPassFilter.frequency.value = 85;
+
 	// Buffer size 2048 gives ~46ms at 44.1k or ~128ms at 16k
 	const bufferSize = 2048;
 	scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
@@ -165,7 +170,8 @@ export async function startAudioStreaming(
 	muteGainNode = audioContext.createGain();
 	muteGainNode.gain.value = 0;
 
-	sourceNode.connect(scriptProcessor);
+	sourceNode.connect(highPassFilter);
+	highPassFilter.connect(scriptProcessor);
 	scriptProcessor.connect(muteGainNode);
 	muteGainNode.connect(audioContext.destination);
 
