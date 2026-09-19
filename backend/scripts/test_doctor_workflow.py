@@ -98,19 +98,27 @@ def test_doctor_workflow():
 
 	# 4. Test Successful Booking with Doctor Attribution
 	print("\n--- 4. Testing Successful Booking with Doctor Attribution on Tuesday ---")
+	today = date.today()
+	# Find next open Tuesday within the 8-day window
+	days_ahead = (1 - today.weekday()) % 7
+	if days_ahead == 0:
+		days_ahead = 7
+	next_tue = today + timedelta(days=days_ahead)
+	next_tue_str = next_tue.isoformat()
+
 	cal = CalendarService(settings)
-	available_slots = cal.get_free_slots("2026-09-15")
+	available_slots = cal.get_free_slots(next_tue_str)
 	test_slot = available_slots[0] if available_slots else "11:30"
 	res_valid = select_slot(
 		mock_app,
 		{"user_input": f"Book with Dr. Rohit Verma on Tuesday at {test_slot}", "profile": {"name": "Anand Choudhary", "phone": "9876543210"}},
-		{"date": "2026-09-15", "time": test_slot, "doctor": "Dr. Rohit Verma"}
+		{"date": next_tue_str, "time": test_slot, "doctor": "Dr. Rohit Verma"}
 	)
 	assert res_valid.data.get("reserved") is True
 	assert res_valid.data.get("doctor") == "Dr. Rohit Verma"
 	booking_id = res_valid.pending_booking_id
 	assert booking_id is not None
-	print(f"✓ Slot reserved with {res_valid.data.get('doctor')} on Tuesday 2026-09-15 at {test_slot}. Booking ID: {booking_id}")
+	print(f"✓ Slot reserved with {res_valid.data.get('doctor')} on Tuesday {next_tue_str} at {test_slot}. Booking ID: {booking_id}")
 
 	# Verify booking in database has doctor field
 	b = mock_store.get(booking_id)
@@ -119,21 +127,28 @@ def test_doctor_workflow():
 
 	# 5. Test Sunday Clinic Closure
 	print("\n--- 5. Testing Sunday Clinic Closure ---")
+	sun_ahead = (6 - today.weekday()) % 7
+	if sun_ahead == 0:
+		sun_ahead = 7
+	next_sun = today + timedelta(days=sun_ahead)
+	next_sun_str = next_sun.isoformat()
+	next_mon_str = (next_sun + timedelta(days=1)).isoformat()
+
 	res_sunday_avail = check_availability(
 		mock_app,
 		{"user_input": "Do you have slots this coming Sunday?"},
-		{"date": "2026-09-13"}
+		{"date": next_sun_str}
 	)
 	assert res_sunday_avail.data.get("clinic_closed") is True
 	assert res_sunday_avail.data.get("available") is False
 	assert "closed on Sundays" in res_sunday_avail.data.get("note", "")
-	assert res_sunday_avail.data.get("next_open_date") == "2026-09-14"
+	assert res_sunday_avail.data.get("next_open_date") == next_mon_str
 	print(f"✓ Sunday availability check correctly rejected with closure notice: {res_sunday_avail.data.get('note')}")
 
 	res_sunday_select = select_slot(
 		mock_app,
 		{"user_input": "Book me on Sunday at 11:00", "profile": {"name": "Anand"}},
-		{"date": "2026-09-13", "time": "11:00"}
+		{"date": next_sun_str, "time": "11:00"}
 	)
 	assert res_sunday_select.data.get("clinic_closed") is True
 	assert res_sunday_select.payload_type == "response"

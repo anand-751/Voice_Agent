@@ -15,6 +15,7 @@ class Doctor:
 	description: str
 	working_days: List[str]  # e.g. ["Tuesday", "Thursday", "Saturday"]
 	working_days_str: str
+	working_days_hindi: str = ""
 	keywords: List[str] = field(default_factory=list)
 
 
@@ -27,12 +28,20 @@ DOCTORS: List[Doctor] = [
 		description="Specialist in root canal treatments (RCT), tooth pain relief, cosmetic whitening, and dental restorations. 12 years of experience.",
 		working_days=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
 		working_days_str="Monday through Saturday (10:00 AM – 7:00 PM)",
+		working_days_hindi="Monday se Saturday (subah 10:00 AM se shaam 7:00 PM)",
 		keywords=[
 			"root canal", "rct", "toothache", "tooth pain", "tooth ache", "gum pain",
 			"cavity", "cavities", "filling", "fillings", "decay", "swelling",
 			"cleaning", "scaling", "polishing", "teeth whitening", "whitening",
 			"crown", "crowns", "cap", "veneer", "veneers", "checkup", "consultation",
 			"general", "sensitivity", "broken tooth", "chipped tooth",
+			"bleeding", "bleed", "bleeding gums", "blood in mouth", "tooth issue",
+			"teeth issue", "dental issue", "tooth problem", "teeth problem",
+			"dard", "daant dard", "daanto mein dard", "khoon", "masudo se khoon",
+			"masude", "masuda", "masudon", "soojan", "sujan", "keeda", "keda",
+			"daant mein keeda", "peele daant", "safai", "jhanjhanahat",
+			"कैविटी", "ब्लीडिंग", "दर्द", "दांत दर्द", "मसूड़े", "मसूड़ों", "खून",
+			"सफाई", "रूट कैनाल", "सेंसिटिविटी", "कीड़ा", "सूजन",
 		],
 	),
 	Doctor(
@@ -42,11 +51,16 @@ DOCTORS: List[Doctor] = [
 		description="Specialist in teeth alignment, braces (metal & ceramic), clear aligners (Invisalign), and bite correction. Visits on Tuesday, Thursday, and Saturday.",
 		working_days=["Tuesday", "Thursday", "Saturday"],
 		working_days_str="Tuesday, Thursday, and Saturday (10:00 AM – 7:00 PM)",
+		working_days_hindi="Tuesday, Thursday aur Saturday (subah 10:00 AM se shaam 7:00 PM)",
 		keywords=[
 			"braces", "aligner", "aligners", "clear aligners", "invisalign",
 			"crooked", "crooked teeth", "gap", "gaps", "spacing", "overlapping",
 			"teeth alignment", "straighten", "straightening", "bite", "overbite",
 			"underbite", "jaw alignment", "orthodontic", "orthodontics", "ortho",
+			"metal braces", "ceramic braces", "clip", "clips", "wire",
+			"tedhe", "tedhe medhe", "tedhe daant", "daant tedhe", "taar", "tar",
+			"daant mein gap", "daanton mein gap",
+			"ब्रेसेस", "एलाइनर", "टेढ़े", "टेढ़े मेढ़े", "दांत सीधे", "तार", "गैप",
 		],
 	),
 ]
@@ -106,6 +120,22 @@ def recommend_doctor_by_problem(problem_text: str) -> Optional[Doctor]:
 			return endo_doc
 
 	return None
+
+
+def get_doctor_recommendation_context(problem_text: str) -> Optional[dict]:
+	"""Return structured recommendation context including doctor name, specialty,
+	and exact available days in both English and Hindi.
+	"""
+	doc = recommend_doctor_by_problem(problem_text)
+	if not doc:
+		return None
+	return {
+		"recommended_doctor": doc.name,
+		"specialty": doc.specialty,
+		"doctor_available_days": doc.working_days_str,
+		"doctor_available_days_hindi": getattr(doc, "working_days_hindi", doc.working_days_str),
+		"recommendation_reason": f"{doc.name} is the clinic's senior specialist for this treatment.",
+	}
 
 
 def is_doctor_available_on_date(doctor: Doctor, date_str: str) -> tuple[bool, str]:

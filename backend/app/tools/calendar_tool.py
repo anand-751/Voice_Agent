@@ -199,6 +199,7 @@ def check_availability(app, state, args) -> ToolResult:
 		data["doctor_available"] = True
 		data["doctor_specialty"] = doc.specialty
 		data["doctor_days"] = doc.working_days_str
+		data["doctor_days_hindi"] = getattr(doc, "working_days_hindi", doc.working_days_str)
 	else:
 		available_docs = [d.name for d in get_all_doctors() if day_name in d.working_days]
 		data["available_doctors"] = available_docs
@@ -207,6 +208,7 @@ def check_availability(app, state, args) -> ToolResult:
 			data["recommended_doctor"] = rec.name
 			data["doctor_specialty"] = rec.specialty
 			data["doctor_days"] = rec.working_days_str
+			data["doctor_days_hindi"] = getattr(rec, "working_days_hindi", rec.working_days_str)
 
 	return ToolResult(data=data)
 
