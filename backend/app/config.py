@@ -35,10 +35,7 @@ class Settings(BaseSettings):
 	CHROMA_DIR: str = "./data/chroma"
 	CHROMA_COLLECTION: str = "clinic_kb"
 	KB_DIR: str = "./app/knowledge"
-	KB_FAQS_PATH: str = "./app/knowledge/clinic_faqs.md"
 	RAG_TOP_K: int = 4
-	USE_LANGEXTRACT: bool = True
-	LANGEXTRACT_MODEL: str = "gemini-2.5-flash"
 
 	# ── Google Calendar ──────────────────────────────────
 	GOOGLE_CALENDAR_ID: str = "primary"

@@ -159,9 +159,9 @@ def get_fast_chit_chat_response(
 		)
 	if category == "chitchat":
 		return (
-			f"Main bilkul theek hoon ji, poochne ke liye bahut shukriya! Main aaj aapki dental care ya doctor appointment scheduling mein kaise madad kar sakti hoon?"
+			f"Main bilkul theek hoon ji, poochne ke liye shukriya! Batayein, {clinic_name} mein main aapki kaise madad kar sakti hoon?"
 			if is_hindi_prov
-			else "I am doing very well, thank you so much for asking! How may I assist you with your dental care or scheduling an appointment today?"
+			else "I am doing well, thank you for asking! How may I assist you today?"
 		)
 	if category == "compliment":
 		if is_hindi_prov:
@@ -224,25 +224,11 @@ def get_fast_chit_chat_response(
 				if is_hindi_prov
 				else "Certainly! Would you like me to schedule an appointment or answer any questions?"
 			)
-	if category in ("out_of_scope", "non_dental"):
-		is_physical = any(
-			w in lowered
-			for w in (
-				"chai", "tea", "paani", "pani", "water", "coffee", "khana", "food",
-				"lunch", "dinner", "breakfast", "darwaza", "door", "gate", "gaadi",
-				"चाय", "पानी", "कॉफ़ी", "खाना", "लंच", "डिनर", "नाश्ता", "दरवाजा", "गेट", "गाड़ी"
-			)
-		)
-		if is_physical:
-			return (
-				f"Main {clinic_name} ki AI phone receptionist hoon ji, isliye physical tasks jaise paani ya chai laane mein main aapki madad nahi kar sakti. Agar aapko dental checkup, teeth pain ya doctor appointment scheduling ke baare mein jaankari chahiye toh batayein."
-				if is_hindi_prov
-				else f"I am the AI phone receptionist at {clinic_name}, so I cannot perform physical tasks like that. Please let me know if you need assistance with dental checkups, treatments, or scheduling an appointment."
-			)
+	if category == "non_dental":
 		return (
-			f"Main {clinic_name} ki AI receptionist hoon ji, isliye main is vishay par aapki madad nahi kar sakti. Agar aapko daanton ki pareshani, clinic timings ya doctor appointment ke regarding help chahiye toh batayein."
+			f"Main {clinic_name} ki AI receptionist hoon ji, isliye main sirf dental treatments, timings aur appointments se jude sawalon mein madad kar sakti hoon. Kya aapko clinic ke baare mein koi aur jaankari chahiye?"
 			if is_hindi_prov
-			else f"I am the AI receptionist at {clinic_name}, so I cannot assist with that topic. Please let me know if you would like help with dental care, clinic hours, or scheduling an appointment."
+			else f"I am the AI receptionist at {clinic_name}. I can only assist with dental treatments, clinic hours, and appointments. How may I help you with your dental care?"
 		)
 	if category == "complaint":
 		return get_deescalation_response(clinic_name=clinic_name, provider=provider, user_text=user_text)
@@ -840,15 +826,10 @@ class LLMService:
 				"clean_query": full_candidate,
 			}
 
-		# 5. Out-of-scope & Non-dental requests (physical tasks, tea/water/food, weather, jokes, general off-topic, non-dental medical)
-		out_of_scope_pat = re.compile(
-			r"\b(chai|tea|paani|pani|water|coffee|khana|food|lunch|dinner|breakfast|order|darwaza|door|gate|gaadi|car saaf|"
-			r"weather|mausam|cricket|score|match|politics|neta|recipe|cook|cooking|joke|chutkula|latifa|song|gana|geet|poem|kavita|shayari|"
-			r"code|coding|python|javascript|program|homework|movie|film|cinema|"
-			r"back\s*pain|stomach|stomach\s*pain|headache|head-ache|sar\s*dard|sar\s*mein\s*dard|bukhar|knee|leg|shoulder|chest|cough|cold|fever)\b|"
-			r"(?<![\u0900-\u097F])(?:चाय|पानी|कॉफ़ी|कॉफी|खाना|लंच|डिनर|नाश्ता|दरवाजा|गेट|गाड़ी|कार|"
-			r"मौसम|क्रिकेट|मैच|राजनीति|जोक|चुटकुला|लतीफा|गाना|गीत|कविता|शायरी|मूवी|फिल्म|"
-			r"कमर|कमरदर्द|पेट|पेटदर्द|सिर|सिरदर्द|सिर\s*दर्द|पैर|हाथ|कंधे|बुखार|खांसी|जुकाम)(?![\u0900-\u097F])",
+		# 5. Non-dental medical requests (fever, headache, back pain, stomach ache, etc.)
+		non_dental_pat = re.compile(
+			r"\b(back\s*pain|stomach|stomach\s*pain|headache|head-ache|sar\s*dard|sar\s*mein\s*dard|bukhar|fever|knee|leg|shoulder|chest|cough|cold)\b|"
+			r"(?<![\u0900-\u097F])(?:कमर|कमरदर्द|पेट|पेटदर्द|सिर|सिरदर्द|सिर\s*दर्द|पैर|हाथ|कंधे|बुखार|खांसी|जुकाम)(?![\u0900-\u097F])",
 			re.IGNORECASE,
 		)
 		dental_override_pat = re.compile(
@@ -856,14 +837,14 @@ class LLMService:
 			r"(?<![\u0900-\u097F])(?:दांत|दांतों|दाँत|डेंटल|टूथपेन|टूथ\s*पेन|टूथ|मसूड़े|मसूड़ों|जबड़ा|जबड़े|मुंह|कैविटी|ब्रेसेस|रूट\s*कैनाल|अकल\s*दाढ़|दाढ़)(?![\u0900-\u097F])",
 			re.IGNORECASE,
 		)
-		if out_of_scope_pat.search(clean) and not dental_override_pat.search(clean):
+		if non_dental_pat.search(clean) and not dental_override_pat.search(clean):
 			clinic_name = getattr(self.s, "CLINIC_NAME", "Bright Dental Clinic")
-			resp = get_fast_chit_chat_response("out_of_scope", clean, clinic_name=clinic_name, provider=provider)
+			resp = get_fast_chit_chat_response("non_dental", clean, clinic_name=clinic_name, provider=provider)
 			return {
 				"decision": "FAST_RESPONSE",
 				"sentiment": "neutral",
 				"intent": None,
-				"fast_category": "out_of_scope",
+				"fast_category": "non_dental",
 				"backchannel": None,
 				"deescalation_response": resp,
 				"direct_response": resp,
@@ -1146,15 +1127,15 @@ class LLMService:
 			'  "decision": "WAIT_AND_LISTEN" | "EXECUTE_TURN" | "DROP_NOISE" | "SECURITY_INTERCEPT" | "FAST_RESPONSE" | "CALL_END",\n'
 			'  "sentiment": "neutral" | "angry",\n'
 			'  "intent": "payment" | "slots" | "info" | "short" | null,\n'
-			'  "fast_category": "greeting" | "chitchat" | "acknowledgment" | "compliment" | "farewell" | "non_dental" | "out_of_scope" | "complaint" | null,\n'
+			'  "fast_category": "greeting" | "chitchat" | "acknowledgment" | "compliment" | "farewell" | "non_dental" | "complaint" | null,\n'
 			'  "backchannel": "Ji..." | "Haan ji..." | null,\n'
 			'  "deescalation_response": "<apologetic help if angry complaint, or refusal if injection, else null>",\n'
 			'  "clean_query": "<merged complete question or current text>"\n'
 			"}\n\n"
 			"Guidelines:\n"
 			"- CALL_END / fast_category='farewell': Caller wants to conclude, cut, or end the call ('cut the call', 'disconnect', 'done with this', 'no more questions', 'bye', 'alvida', 'thanks for the help'). If caller already reserved or confirmed an appointment and expresses gratitude or says they are done, ALWAYS choose CALL_END / farewell.\n"
-			"- FAST_RESPONSE: For pure greetings (namaste, hello), compliments ('aapki aawaz achhi hai'), chit-chat (kaise ho), acknowledgments (theek hai), out-of-scope/non-dental requests (chai, paani, weather, jokes, general off-topic, fever/headache), or complaints. Set intent=null and fast_category.\n"
-			"- EXECUTE_TURN (REAL IN-SCOPE):\n"
+			"- FAST_RESPONSE: For pure greetings (namaste, hello), compliments ('aapki aawaz achhi hai'), chit-chat (kaise ho), acknowledgments (theek hai), non-dental medical requests (fever/headache), or complaints. Set intent=null and fast_category.\n"
+			"- EXECUTE_TURN:\n"
 			"  * intent='slots': Doctor availability, dates, times, days, slot booking, rescheduling, cancelling.\n"
 			"  * intent='info': Dental treatments, tooth pain, cavity, bleeding, cleaning, doctor specialties, charges, fees, clinic location, policies.\n"
 			"  * intent='payment': Payment completed, UPI, QR code, fees paid, transfer, GPay, PhonePe.\n"
@@ -1253,11 +1234,11 @@ class LLMService:
 				sentiment = "angry"
 
 			fast_cat = data.get("fast_category")
-			if not fast_cat and raw_intent in ("greeting", "chitchat", "acknowledgment", "compliment", "farewell", "non_dental", "out_of_scope", "complaint"):
+			if not fast_cat and raw_intent in ("greeting", "chitchat", "acknowledgment", "compliment", "farewell", "non_dental", "complaint"):
 				fast_cat = raw_intent
 
 			if (dec in ("CALL_END", "FAST_RESPONSE") or fast_cat) and (
-				fast_cat in ("farewell", "compliment", "latency_check", "non_dental", "out_of_scope")
+				fast_cat in ("farewell", "compliment", "latency_check", "non_dental")
 				or dec == "CALL_END"
 				or not any(k in merged.lower() for k in ACTIONABLE_TERMS)
 			):

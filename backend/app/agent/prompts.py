@@ -38,7 +38,6 @@ ACTIONS:
 5. "booking.cancel" — user cancels pending booking. args: {{}}
 6. "end_call" — user says bye / thanks and is done. args: {{}}
 7. "chitchat" — greetings, thanks, well-being ('kaise ho'), compliments. args: {{}}
-8. "out_of_scope" — off-topic or non-dental requests (asking for water/tea/food, weather, cricket, politics, jokes, non-dental illness). args: {{"topic": "<topic>"}}
 
 OUTPUT:
 Output ONLY: {{"action": "<action>", "args": {{...}}, "reason": "<5 words>"}}

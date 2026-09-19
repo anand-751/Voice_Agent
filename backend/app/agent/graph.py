@@ -6,7 +6,7 @@ from .state import AgentState
 
 def route_after_router(state):
 	action = state["decision"].get("action", "chitchat")
-	return "responder" if action in ("chitchat", "end_call", "out_of_scope") else "tools"
+	return "responder" if action in ("chitchat", "end_call") else "tools"
 
 
 def build_graph(app):

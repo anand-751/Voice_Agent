@@ -12,7 +12,6 @@ from .api.websocket import router as ws_router
 from .config import get_settings
 from .services.booking_store import BookingStore
 from .services.call_queue import CallQueueManager
-from .services.extractor import LangExtractService
 from .services.llm import LLMService
 from .services.observability import ObservabilityService
 from .services.rumik import RumikTTSService
@@ -35,7 +34,6 @@ async def lifespan(app: FastAPI):
 	app.state.bookings = BookingStore(settings.DATABASE_PATH)
 	app.state.vectors = VectorStore()            # Chroma + embeddings
 	app.state.vectors.ensure_ingested()          # auto-ingest KB on first boot
-	app.state.extractor = LangExtractService(settings) # Google langextract + grounded extraction
 	app.state.graph = build_graph(app)           # compiled LangGraph, built once
 	app.state.call_queue = CallQueueManager(
 		max_concurrent=settings.MAX_CONCURRENT_CALLS,

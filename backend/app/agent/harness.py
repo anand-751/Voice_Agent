@@ -29,7 +29,6 @@ ALLOWED_ACTIONS = {
 	"booking.cancel",
 	"chitchat",
 	"end_call",
-	"out_of_scope",
 }
 
 # ── Spoken Acoustic Replacements ──────────────────────────────────────────────

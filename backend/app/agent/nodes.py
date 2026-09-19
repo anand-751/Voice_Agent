@@ -19,7 +19,7 @@ from ..tools.registry import dispatch
 log = logging.getLogger("agent")
 
 HISTORY_TAIL = 3          # recent turns fed to each LLM call
-SKIP_TOOLS = {"chitchat", "end_call", "out_of_scope"}
+SKIP_TOOLS = {"chitchat", "end_call"}
 
 
 def _get_pending_booking_context(app, pending_id: str) -> str:
@@ -96,24 +96,6 @@ def _get_deterministic_template_reply(
 		if is_sarvam:
 			return f"{clinic_name} mein call karne ke liye dhanyawad! Apna khayal rakhiye, have a great day!"
 		return f"Thank you so much for calling {clinic_name}! Take wonderful care of your smile, and have a lovely day ahead!"
-
-	# 2. Out-of-scope requests (physical demands, non-dental topics)
-	if action == "out_of_scope":
-		is_physical = any(
-			w in lowered
-			for w in (
-				"chai", "tea", "paani", "pani", "water", "coffee", "khana", "food",
-				"lunch", "dinner", "breakfast", "darwaza", "door", "gate", "gaadi",
-				"चाय", "पानी", "कॉफ़ी", "खाना", "दरवाजा", "गेट", "गाड़ी"
-			)
-		)
-		if is_physical:
-			if is_rumik or is_sarvam:
-				return f"Main {clinic_name} ki AI phone receptionist hoon ji, isliye physical tasks jaise paani ya chai laane mein main aapki madad nahi kar sakti. Agar aapko dental checkup, treatments ya doctor appointment scheduling ke baare mein jaankari chahiye toh batayein."
-			return f"I am the AI phone receptionist at {clinic_name}, so I cannot perform physical tasks like that. Please let me know if you need assistance with dental checkups, treatments, or scheduling an appointment."
-		if is_rumik or is_sarvam:
-			return f"Main {clinic_name} ki AI receptionist hoon ji, isliye main is vishay par aapki madad nahi kar sakti. Agar aapko daanton ki pareshani, clinic timings ya doctor appointment ke regarding help chahiye toh batayein."
-		return f"I am the AI receptionist at {clinic_name}, so I cannot assist with that topic. Please let me know if you would like help with dental care, clinic hours, or scheduling an appointment."
 
 	# Only check fast templates if action is chitchat
 	if action != "chitchat":
