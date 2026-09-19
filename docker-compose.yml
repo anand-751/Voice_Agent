@@ -1,0 +1,19 @@
+# Backend application service
+# To run backend together with Langfuse observability:
+#   docker compose -f docker-compose.yml -f docker-compose.langfuse.yml up -d
+# Or run Langfuse separately:
+#   docker compose -f docker-compose.langfuse.yml up -d
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - backend-data:/srv/data
+    restart: unless-stopped
+
+volumes:
+  backend-data:

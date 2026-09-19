@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@keyframes heartbeat {
+	0% {
+		transform: scale(1);
+	}
+	14% {
+		transform: scale(1.085);
+	}
+	28% {
+		transform: scale(1);
+	}
+	42% {
+		transform: scale(1.045);
+	}
+	70% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes heartbeatGlow {
+	0% {
+		opacity: 0.35;
+		transform: scale(1);
+	}
+	14% {
+		opacity: 0.75;
+		transform: scale(1.22);
+	}
+	28% {
+		opacity: 0.35;
+		transform: scale(1);
+	}
+	42% {
+		opacity: 0.55;
+		transform: scale(1.12);
+	}
+	70% {
+		opacity: 0.35;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0.35;
+		transform: scale(1);
+	}
+}
+
+@keyframes pulseDot {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+		box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+	}
+	50% {
+		opacity: 0.55;
+		transform: scale(0.9);
+		box-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+	}
+}
+
+@keyframes ringBreath {
+	0%, 100% {
+		box-shadow: 0 0 20px rgba(14, 165, 233, 0.35), inset 0 0 15px rgba(14, 165, 233, 0.2);
+	}
+	50% {
+		box-shadow: 0 0 35px rgba(56, 189, 248, 0.6), inset 0 0 25px rgba(56, 189, 248, 0.35);
+	}
+}
+
+.animate-heartbeat {
+	animation: heartbeat 1.45s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+	transform-origin: center center;
+}
+
+.animate-heartbeat-glow {
+	animation: heartbeatGlow 1.45s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+	transform-origin: center center;
+}
+
+.animate-pulse-dot {
+	animation: pulseDot 2s ease-in-out infinite;
+}
+
+.animate-ring-breath {
+	animation: ringBreath 3.5s ease-in-out infinite;
+}
+
+/* Custom scrollbar for chat transcript drawer */
+.custom-scrollbar::-webkit-scrollbar {
+	width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.15);
+	border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
